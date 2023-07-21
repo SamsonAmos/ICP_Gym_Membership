@@ -1,0 +1,37 @@
+type Gym = record {
+  id : text;
+  gymName : text;
+  members : vec text;
+  owner : principal;
+  createdAt : nat64;
+  gymLocation : text;
+  gymServices : vec GymService;
+  updatedAt : opt nat64;
+  gymImgUrl : text;
+};
+type GymPayload = record {
+  gymName : text;
+  gymLocation : text;
+  gymImgUrl : text;
+};
+type GymService = record {
+  id : text;
+  serviceName : text;
+  createdAt : nat64;
+  serviceDescription : text;
+};
+type GymServicePayload = record {
+  serviceName : text;
+  serviceDescription : text;
+};
+type _AzleResult = variant { Ok : Gym; Err : text };
+type _AzleResult_1 = variant { Ok : vec Gym; Err : text };
+service : () -> {
+  addGymService : (text, GymServicePayload) -> (_AzleResult);
+  createGym : (GymPayload) -> (_AzleResult);
+  deleteAGymById : (text) -> (_AzleResult);
+  fetchAllGyms : () -> (_AzleResult_1) query;
+  fetchGymById : (text) -> (_AzleResult) query;
+  registerForAgym : (text) -> (_AzleResult);
+  updateGym : (text, GymPayload) -> (_AzleResult);
+}
