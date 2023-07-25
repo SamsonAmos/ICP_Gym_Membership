@@ -59,7 +59,24 @@ export function fetchGymById(id: string): Result<Gym, string> {
 // function to create a gym
 $update;
 export function createGym(payload: GymPayload): Result<Gym, string> {
-    const gym: Gym = { owner: ic.caller(), id: uuidv4(), members : [], gymServices : [], createdAt: ic.time(), updatedAt: Opt.None, ...payload };
+    // const gym: Gym = { owner: ic.caller(), id: uuidv4(), members : [], gymServices : [], createdAt: ic.time(), updatedAt: Opt.None, ...payload };
+    
+      // Validate payload
+  if (!payload.gymName || !payload.gymImgUrl || !payload.gymLocation) {
+    return Result.Err("Missing required fields");
+  }
+
+  // Create gym object
+  const gym: Gym = {
+    owner: ic.caller(),
+    id: uuidv4(),
+    members: [],
+    gymServices: [],
+    createdAt: ic.time(),
+    updatedAt: Opt.None,
+    ...payload,
+  };
+    
     gymStorage.insert(gym.id, gym);
     return Result.Ok(gym);
 }
@@ -129,14 +146,24 @@ export function registerForAgym (id: string): Result<Gym, string> {
 // function to update a gym by its id
 $update;
 export function updateGym(id: string, payload: GymPayload): Result<Gym, string> {
-    return match(gymStorage.get(id), {
+    if (!payload.gymName || !payload.gymImgUrl || !payload.gymLocation) {
+        return Result.Err<Gym, string>("Invalid payload. Missing required fields.");
+      }
+      return match(gymStorage.get(id), {
         Some: (gym) => {
-            const updatedGym: Gym = {...gym, ...payload, updatedAt: Opt.Some(ic.time())};
-            gymStorage.insert(gym.id, updatedGym);
-            return Result.Ok<Gym, string>(updatedGym);
+          const updatedGym: Gym = {
+            ...gym,
+            ...payload,
+            updatedAt: Opt.Some(ic.time()),
+          };
+          gymStorage.insert(gym.id, updatedGym);
+          return Result.Ok<Gym, string>(updatedGym);
         },
-        None: () => Result.Err<Gym, string>(`couldn't update the gym with this id=${id}. gym not found`)
-    });
+        None: () =>
+          Result.Err<Gym, string>(
+            `couldn't update the gym with this id=${id}. gym not found`
+          ),
+      });
 }
 
 
